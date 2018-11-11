@@ -14,4 +14,4 @@ This repository holds all code used by the inVenTs Rocketry team at Virginia Tec
 * Rachel Bueter
 * Rajan Mann
 * Thomas Olivero
-* Will Pryor
+* [Will Pryor](Users/WillPryor.md)
