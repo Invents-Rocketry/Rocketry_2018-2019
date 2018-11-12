@@ -3,7 +3,7 @@ This repository holds all code used by the inVenTs Rocketry team at Virginia Tec
 
 ## Electronics Subteam Members
 * [Nicolas Gutkowski](Users/nicolas-gutkowski.md)
-* Yen Truong
+* [Yen Truong](Users/YenTruong.md)
 * Ian Murray
 * Daniel Hall
 * David Anderson
