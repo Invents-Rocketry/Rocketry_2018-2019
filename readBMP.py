@@ -49,8 +49,14 @@ sensor = BMP085.BMP085()
 f = open("data.csv","w+")
 f.write("Altitude (m), Temperature (C), Pressure (Pa), Velocity (Y), Acceleration (Y), Roll Velocity, Roll Acceleration \n")
 
+ground = sensor.read_altitude()
 
-while(true):
+f.write("{0:02f},{0:02f},{0:02f},\n".format(sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure()))
+
+while(sensor.read_altitude() - ground < 8):
+
+
+while(sensor.read_altitude() - ground >= 8):
     f.write('{0:0.2f}, '.format(sensor.read_altitude()))
     f.write('{0:0.2f}, '.format(sensor.read_temperature()))
     f.write('{0:0.2f}, '.format(sensor.read_pressure()))
