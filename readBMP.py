@@ -51,7 +51,6 @@ f.write("Altitude (m), Temperature (C), Pressure (Pa), Velocity (Y), Acceleratio
 
 ground = sensor.read_altitude()
 
-#add 4 more data in the line below
 f.write("{0:02f},{0:02f},{0:02f},\n".format(sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(), sensor.read_gyroscope(), sensor.read_linear_acceleration(), sensor.read_accelerometer()))
 
 while(sensor.read_altitude() - ground < 8):
