@@ -1,20 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <pthread.h>
 
-static void* thread_func(void* param) {
+#include <stdlib.h>
 
-  char* arg = (char*) param;
-  if(!strcmp(arg, "sensor")) {
-      execvp("readData.py", NULL);
-  }
+int main(int argc, char** argv) {
 
-}
-
-int main() {
-
-
-
+	execvp("readBMP.py", NULL);
+	execvp("camera.py", NULL);
 
 }
