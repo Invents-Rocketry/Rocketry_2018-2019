@@ -51,7 +51,7 @@ f.write("Altitude (m), Temperature (C), Pressure (Pa), Velocity (Y), Acceleratio
 
 ground = sensor.read_altitude()
 
-f.write("{0:02f},{0:02f},{0:02f},\n".format(sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure()))
+f.write("{0:02f},{0:02f},{0:02f},\n".format(sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(), sensor.read_gyroscope(), sensor.read_linear_acceleration(), sensor.read_accelerometer()))
 
 while(sensor.read_altitude() - ground < 8):
 
@@ -60,6 +60,8 @@ while(sensor.read_altitude() - ground >= 8):
     f.write('{0:0.2f}, '.format(sensor.read_altitude()))
     f.write('{0:0.2f}, '.format(sensor.read_temperature()))
     f.write('{0:0.2f}, '.format(sensor.read_pressure()))
+    # add the other four data (velocity and acceleration for Y axis and Roll)
+    #be sure to include \n for the last line when writing into the file
 
 
 f.close()
