@@ -6,7 +6,9 @@
 
 int main(int argc, char** argv) {
 
-	execvp("readBMP.py", NULL);
+	if(argc > 0 && !strcmp(argv[1], "sensor")) {
+		execvp("readBMP.py", NULL);
+	}
 	execvp("camera.py", NULL);
 
 }
