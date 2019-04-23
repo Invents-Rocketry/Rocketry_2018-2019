@@ -26,42 +26,82 @@
 
 import Adafruit_BMP.BMP085 as BMP085
 
+import time
+import logging
+import sys
+
+from Adafruit_BNO055 import BNO055
+
+
 # Default constructor will pick a default I2C bus.
 #
 # For the Raspberry Pi this means you should hook up to the only exposed I2C bus
 # from the main GPIO header and the library will figure out the bus number based
 # on the Pi's revision.
-#
-# For the Beaglebone Black the library will assume bus 1 by default, which is
-# exposed with SCL = P9_19 and SDA = P9_20.
 sensor = BMP085.BMP085()
 
 # Optionally you can override the bus number:
 #sensor = BMP085.BMP085(busnum=2)
 
-# You can also optionally change the BMP085 mode to one of BMP085_ULTRALOWPOWER,
-# BMP085_STANDARD, BMP085_HIGHRES, or BMP085_ULTRAHIGHRES.  See the BMP085
-# datasheet for more details on the meanings of each mode (accuracy and power
-# consumption are primarily the differences).  The default mode is STANDARD.
-#sensor = BMP085.BMP085(mode=BMP085.BMP085_ULTRAHIGHRES)
+
+# Create and configure the BNO sensor connection.  Make sure only ONE of the
+# below 'bno = ...' lines is uncommented:
+# Raspberry Pi configuration with serial UART and RST connected to GPIO 18:
+bno = BNO055.BNO055(serial_port='/dev/serial0', rst=18)
+
+# Enable verbose debug logging if -v is passed as a parameter.
+if len(sys.argv) == 2 and sys.argv[1].lower() == '-v':
+    logging.basicConfig(level=logging.DEBUG)
+
+# Initialize the BNO055 and stop if something went wrong.
+if not bno.begin():
+    raise RuntimeError('Failed to initialize BNO055! Is the sensor connected?')
+
+# Print BNO055 software revision and other diagnostic data.
+sw, bl, accel, mag, gyro = bno.get_revision()
+
 
 
 f = open("data.csv","w+")
-f.write("Altitude (m), Temperature (C), Pressure (Pa), Velocity (Y), Acceleration (Y), Roll Velocity, Roll Acceleration \n")
+f.write("Time, Altitude (m), Temperature (C), Pressure (Pa), Velocity (Y), Acceleration (Y), Roll Velocity, Roll Acceleration \n")
 
 ground = sensor.read_altitude()
+beginTime = int(round(time.time() * 1000)) 
 
-f.write("{0:02f},{0:02f},{0:02f},\n".format(sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(), sensor.read_gyroscope(), sensor.read_linear_acceleration(), sensor.read_accelerometer()))
+f.write("{:d},{0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}a\n".format( beginTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
+    0, 0, 0, 0)
 
+#before launch
 while(sensor.read_altitude() - ground < 8):
 
 
+#after launch
+prevTime = int(round(time.time() * 1000))
+prevAltitude = sensor.read_altitude()
+
 while(sensor.read_altitude() - ground >= 8):
-    f.write('{0:0.2f}, '.format(sensor.read_altitude()))
-    f.write('{0:0.2f}, '.format(sensor.read_temperature()))
-    f.write('{0:0.2f}, '.format(sensor.read_pressure()))
-    # add the other four data (velocity and acceleration for Y axis and Roll)
-    #be sure to include \n for the last line when writing into the file
+
+    #linear velocity
+    velocity = (sensor.read_altitude() - prevAltitude)/ ( (int(round(time.time() * 1000))) - prevTime)
+    prevTime = int(round(time.time() * 1000))
+    prevAltitude = sensor.read_altitude()
+
+    #roll velocity
+    x,y,z = bno.read_gyroscope()
+    velocity_roll = y
+
+    #linear acceleration
+    x,y,z = bno.read_linear_acceleration()
+    acceleration = y
+
+    #roll acceleration
+    acceleration_roll = 180 * atan2(y, sqrt(x*x + z*z))/PI
+    
+    #record data
+    f.write("{:d},{0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}a\n".format(prevTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
+    velocity, acceleration, velocity_roll, acceleration_roll)
+
+    f.flush()
 
 
 f.close()
