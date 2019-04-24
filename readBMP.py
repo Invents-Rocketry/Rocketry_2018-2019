@@ -89,7 +89,7 @@ ser.write(str.encode(values))
 
 #before launch
 while(sensor.read_altitude() - ground < 8):
-
+	print()
 
 #after launch
 prevTime = int(round(time.time() * 1000))
