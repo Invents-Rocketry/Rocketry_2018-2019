@@ -82,8 +82,8 @@ f.write("Time, Altitude (m), Temperature (C), Pressure (Pa), Velocity (Y), Accel
 ground = sensor.read_altitude()
 beginTime = int(round(time.time() * 1000)) 
 
-values = "{:d},{0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}a\n".format( beginTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
-    0, 0, 0, 0
+values = "{0:d}, {1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}, {8:02f}\n".format( beginTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
+0, 0, 0, 0)
 f.write(values)
 ser.write(str.encode(values))
 
@@ -114,8 +114,8 @@ while(sensor.read_altitude() - ground >= 8):
     acceleration_roll = 180 * atan2(y, sqrt(x*x + z*z))/PI
     
     #record data
-	values = "{:d},{0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}, {0:02f}a\n".format(prevTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
-    velocity, acceleration, velocity_roll, acceleration_roll
+	values = "{0:d}, {1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}, {8:02f}\n".format(prevTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
+    velocity, acceleration, velocity_roll, acceleration_roll)
     f.write(values)
 	ser.write(str.encode(values))
     f.flush()
