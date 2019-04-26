@@ -24,14 +24,17 @@
 #import logging
 #logging.basicConfig(level=logging.DEBUG)
 
-import Adafruit_BMP.BMP085 as BMP085
+import BMP085
 
 import time
 import logging
 import serial
 import sys
+import board
+import busio
+import adafruit_bno055
 
-from Adafruit_BNO055 import BNO055
+import BNO055
 
 ser = serial.Serial(
     port='/dev/ttyS0',
@@ -57,11 +60,13 @@ sensor = BMP085.BMP085()
 # Create and configure the BNO sensor connection.  Make sure only ONE of the
 # below 'bno = ...' lines is uncommented:
 # Raspberry Pi configuration with serial UART and RST connected to GPIO 18:
-bno = BNO055.BNO055(serial_port='/dev/serial0', rst=18)
+#i2c = busio.I2C(board.SCL, board.SDA)
+#bno = adafruit_bno055.BNO055(i2c)
+#bno = BNO055.BNO055(serial_port='/dev/serial0', rst=18)
 
 # BeagleBone Black configuration with default I2C connection (SCL=P9_19, SDA=P9_20),
 # and RST connected to pin P9_12:
-#bno = BNO055.BNO055(rst='P9_12')
+bno = BNO055.BNO055()
 
 # Enable verbose debug logging if -v is passed as a parameter.
 if len(sys.argv) == 2 and sys.argv[1].lower() == '-v':
@@ -82,14 +87,16 @@ f.write("Time, Altitude (m), Temperature (C), Pressure (Pa), Velocity (Y), Accel
 ground = sensor.read_altitude()
 beginTime = int(round(time.time() * 1000)) 
 
-values = "{0:d}, {1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}, {8:02f}\n".format( beginTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
-0, 0, 0, 0)
+values = "{0:d},{1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}, {8:02f}\n".format( beginTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
+    0, 0, 0, 0, 0)
 f.write(values)
 ser.write(str.encode(values))
 
 #before launch
 while(sensor.read_altitude() - ground < 8):
-	print()
+    print('Ground')
+    ser.write(str.encode('0'))
+    time.sleep(1)
 
 #after launch
 prevTime = int(round(time.time() * 1000))
@@ -114,10 +121,10 @@ while(sensor.read_altitude() - ground >= 8):
     acceleration_roll = 180 * atan2(y, sqrt(x*x + z*z))/PI
     
     #record data
-	values = "{0:d}, {1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}, {8:02f}\n".format(prevTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
+    values = "{0:d},{1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}, {8:02f}\n".format(prevTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
     velocity, acceleration, velocity_roll, acceleration_roll)
     f.write(values)
-	ser.write(str.encode(values))
+    ser.write(str.encode(values))
     f.flush()
 
 
