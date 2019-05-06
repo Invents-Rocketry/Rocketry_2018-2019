@@ -45,7 +45,7 @@ ser = serial.Serial(
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
     bytesize=serial.EIGHTBITS,
-    timeout=1             
+    timeout=1
  )
 
 
@@ -84,12 +84,12 @@ if not bno.begin():
 sw, bl, accel, mag, gyro = bno.get_revision()
 
 
-
-f = open("data.csv","w+")
+time = strftime("%d%m%y_%H%M%S.csv", gmtime())
+f = open(time,"w+")
 f.write("Time, Altitude (m), Temperature (C), Pressure (Pa), Velocity (Y), Acceleration (Y), Roll Velocity, Roll Acceleration \n")
 
 ground = sensor.read_altitude()
-beginTime = int(round(time.time() * 1000)) 
+beginTime = int(round(time.time() * 1000))
 
 values = "{0:d},{1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}\n".format( beginTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
     0, 0, 0, 0)
@@ -102,7 +102,7 @@ prevAltitude = sensor.read_altitude()
 while(sensor.read_altitude() - ground < 8):
     print('Ground')
     #ser.write(str.encode('0'))
-    
+
     #linear velocity
     velocity = (sensor.read_altitude() - prevAltitude)/ ( (int(round(time.time() * 1000))) - prevTime)
     prevTime = int(round(time.time() * 1000))
@@ -117,7 +117,7 @@ while(sensor.read_altitude() - ground < 8):
 
     #roll acceleration
     acceleration_roll = 180 * math.atan2(y, math.sqrt(x*x + z*z))/math.pi
-    
+
     #record data
     values = "{0:d},{1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}\n".format(prevTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
     velocity, acceleration, velocity_roll, acceleration_roll)
@@ -146,7 +146,7 @@ while(sensor.read_altitude() - ground >= 8):
 
     #roll acceleration
     acceleration_roll = 180 * atan2(y, sqrt(x*x + z*z))/PI
-    
+
     #record data
     values = "{0:d},{1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}, {8:02f}\n".format(prevTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
     velocity, acceleration, velocity_roll, acceleration_roll)
