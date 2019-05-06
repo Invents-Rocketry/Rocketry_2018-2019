@@ -1,12 +1,14 @@
 from picamera import PiCamera
-from time import sleep
-import datetime
+import time
 
 camera = PiCamera()
+while(1):
+    name = str(time.time())
+    video = '/home/pi/video' + name + '.h264'
+    #camera.rotation = 180 #use if the view is wrong
 
-while(1)
-    filename = '/home/pi/'
-    filename = filename + str(datetime.datetime.now()) + '.h264'
-    camera.start_recording(filename)
-    sleep(10)
-camera.stop_preview()
+    time.sleep(2) #sleep for at least 2 seconds before capturing, to give the sensor time to set its light levels.
+    camera.start_recording(video)
+    time.sleep(300)
+    camera.stop_recording()
+
