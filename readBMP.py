@@ -33,11 +33,14 @@ import sys
 import board
 import busio
 import adafruit_bno055
+import math
+
+
 
 import BNO055
 
 ser = serial.Serial(
-    port='/dev/ttyS0',
+    port='/dev/ttyAMA0',
     baudrate = 9600,
     parity=serial.PARITY_NONE,
     stopbits=serial.STOPBITS_ONE,
@@ -71,9 +74,10 @@ bno = BNO055.BNO055()
 # Enable verbose debug logging if -v is passed as a parameter.
 if len(sys.argv) == 2 and sys.argv[1].lower() == '-v':
     logging.basicConfig(level=logging.DEBUG)
-
+time.sleep(1)
 # Initialize the BNO055 and stop if something went wrong.
 if not bno.begin():
+    #Wire.reset()
     raise RuntimeError('Failed to initialize BNO055! Is the sensor connected?')
 
 # Print BNO055 software revision and other diagnostic data.
@@ -87,15 +91,38 @@ f.write("Time, Altitude (m), Temperature (C), Pressure (Pa), Velocity (Y), Accel
 ground = sensor.read_altitude()
 beginTime = int(round(time.time() * 1000)) 
 
-values = "{0:d},{1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}, {8:02f}\n".format( beginTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
-    0, 0, 0, 0, 0)
+values = "{0:d},{1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}\n".format( beginTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
+    0, 0, 0, 0)
 f.write(values)
 ser.write(str.encode(values))
 
+prevTime = int(round(time.time() * 1000))
+prevAltitude = sensor.read_altitude()
 #before launch
 while(sensor.read_altitude() - ground < 8):
     print('Ground')
-    ser.write(str.encode('0'))
+    #ser.write(str.encode('0'))
+    
+    #linear velocity
+    velocity = (sensor.read_altitude() - prevAltitude)/ ( (int(round(time.time() * 1000))) - prevTime)
+    prevTime = int(round(time.time() * 1000))
+    prevAltitude = sensor.read_altitude()
+    #roll velocity
+    x,y,z = bno.read_gyroscope()
+    velocity_roll = y
+
+    #linear acceleration
+    x,y,z = bno.read_linear_acceleration()
+    acceleration = y
+
+    #roll acceleration
+    acceleration_roll = 180 * math.atan2(y, math.sqrt(x*x + z*z))/math.pi
+    
+    #record data
+    values = "{0:d},{1:02f}, {2:02f}, {3:02f}, {4:02f}, {5:02f}, {6:02f}, {7:02f}\n".format(prevTime, sensor.read_altitude(), sensor.read_temperature(), sensor.read_pressure(),
+    velocity, acceleration, velocity_roll, acceleration_roll)
+    f.write(values)
+    ser.write(str.encode(values))
     time.sleep(1)
 
 #after launch
